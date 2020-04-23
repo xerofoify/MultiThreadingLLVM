@@ -46,6 +46,7 @@
 #include "llvm/IR/PassInstrumentation.h"
 #include "llvm/IR/PassManagerInternal.h"
 #include "llvm/Pass.h"
+#include "llvm/PassInfo.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/TimeProfiler.h"
 #include "llvm/Support/TypeName.h"
@@ -559,6 +560,15 @@ public:
     Passes.emplace_back(new PassModelT(std::move(Pass)));
   }
 
+  bool checkisAnalysisPass(Pass *pass) {
+	
+	auto *passInfo = pass->lookupPassInfo(pass->getPassID());
+
+	if (passInfo->isAnalysis() || passInfo->isAnalysisGroup())
+			return true;
+	return false;
+  }
+
 private:
   using PassConceptT =
       detail::PassConcept<IRUnitT, AnalysisManagerT, ExtraArgTs...>;
@@ -567,6 +577,7 @@ private:
 
   /// Flag indicating whether we should do debug logging.
   bool DebugLogging;
+
 };
 
 extern template class PassManager<Module>;
